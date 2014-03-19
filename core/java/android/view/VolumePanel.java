@@ -335,7 +335,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         lp.type = LayoutParams.TYPE_VOLUME_OVERLAY;
         lp.width = LayoutParams.WRAP_CONTENT;
         lp.height = LayoutParams.WRAP_CONTENT;
-        lp.privateFlags |= LayoutParams.PRIVATE_FLAG_FORCE_SHOW_NAV_BAR;
         window.setAttributes(lp);
         window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
@@ -385,6 +384,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 mMoreButton.setVisibility(View.VISIBLE);
                 mDivider.setVisibility(View.VISIBLE);
                 mShowCombinedVolumes = true;
+                if (mCurrentOverlayStyle == VOLUME_OVERLAY_NONE) {
+                    addOtherVolumes();
+                }
                 mCurrentOverlayStyle = VOLUME_OVERLAY_EXPANDABLE;
                 break;
             case VOLUME_OVERLAY_EXPANDED :
@@ -529,9 +531,17 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                     streamType == AudioManager.STREAM_NOTIFICATION) {
                 continue;
             }
-            StreamControl sc = mStreamControls.get(streamType);
-            mSliderGroup.addView(sc.group);
-            updateSlider(sc);
+            synchronized (this) {
+                if (mStreamControls == null) {
+                    createSliders();
+                } else {
+                    StreamControl sc = mStreamControls.get(streamType);
+                    // To be sure it was not allready attached remove it.
+                    mSliderGroup.removeView(sc.group);
+                    mSliderGroup.addView(sc.group);
+                    updateSlider(sc);
+                }
+            }
         }
     }
 
