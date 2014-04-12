@@ -406,18 +406,41 @@ public class RecentPanelView {
     protected boolean removeAllApplications() {
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        for (TaskDescription td : mTasks) {
-            // Kill all recent apps.
+        boolean hasFavorite = false;
+        final int oldTaskSize = mTasks.size() - 1;
+        for (int i = oldTaskSize; i >= 0; i--) {
+            TaskDescription td = mTasks.get(i);
+            // User favorites are not removed.
+            if (td.getIsFavorite()) {
+                hasFavorite = true;
+                continue;
+            }
+            // Remove from task stack.
             if (am != null) {
                 am.removeTask(td.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
-                removeApplicationBitmapCacheAndExpandedState(td);
+            }
+            // Remove from task list.
+            mTasks.remove(td);
+            // Remove the card.
+            removeRecentCard(td);
+            // Notify ArrayAdapter about the change.
+            mCardArrayAdapter.notifyDataSetChanged();
+            // Remove bitmap and expanded state.
+            removeApplicationBitmapCacheAndExpandedState(td);
+            // Correct global task size.
+            mTasksSize--;
+        }
+        return !hasFavorite;
+    }
+
+    private void removeRecentCard(TaskDescription td) {
+        for (int i = 0; i < mCards.size(); i++) {
+            RecentCard card = (RecentCard) mCards.get(i);
+            if (card != null && card.getPersistentTaskId() == td.persistentTaskId) {
+                mCards.remove(i);
+                return;
             }
         }
-        // Clear all relevant values.
-        mTasks.clear();
-        mCards.clear();
-        mTasksSize = 0;
-        return true;
     }
 
     /**
@@ -756,37 +779,6 @@ public class RecentPanelView {
         }
     }
 
-    /**
-     * Third loading stage. Container is now visible,
-     * tasks were completly loaded, visible elements
-     * were loaded as well. So let us trigger for all invisible
-     * views the asynctask loaders. This triggers bitmap load
-     * for collapsed expanded cards and as well app icon load
-     * for all non visible cards on the screen.
-     * We are doing this here to avoid peformance issues
-     * on scrolling. Recents screen has a max entry of 21
-     * tasks so this is a good approach to load now all
-     * user information without having any downsides.
-     *
-     */
-    protected void updateInvisibleCards() {
-        RecentCard card;
-        final int size = mCards.size();
-        // We set here an internal value
-        // to prepare force load of the task
-        // thumbnails.
-        for (int i = 0; i < size; i++) {
-            card = (RecentCard) mCards.get(i);
-            card.forceSetLoadExpandedContent();
-        }
-        // Actually trigger on all cards the load if
-        // the content was not loaded allready. This
-        // decisision is done in the cards themselves.
-        for (int i = size - 1; i >= 0; i--) {
-            mCardArrayAdapter.getView(i, null, mListView);
-        }
-    }
-
     protected void setCancelledByUser(boolean cancelled) {
         mCancelledByUser = cancelled;
         if (cancelled) {
@@ -819,6 +811,24 @@ public class RecentPanelView {
 
     protected void setScaleFactor(float factor) {
         mScaleFactor = factor;
+    }
+
+    protected boolean hasFavorite() {
+        for (TaskDescription td : mTasks) {
+            if (td.getIsFavorite()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean hasClearableTasks() {
+        for (TaskDescription td : mTasks) {
+            if (!td.getIsFavorite()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
