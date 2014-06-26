@@ -192,10 +192,16 @@ public class ZygoteInit {
     static void closeServerSocket() {
         try {
             if (sServerSocket != null) {
+                FileDescriptor fd = sServerSocket.getFileDescriptor();
                 sServerSocket.close();
+                if (fd != null) {
+                    Libcore.os.close(fd);
+                }
             }
         } catch (IOException ex) {
             Log.e(TAG, "Zygote:  error closing sockets", ex);
+        } catch (libcore.io.ErrnoException ex) {
+            Log.e(TAG, "Zygote:  error closing descriptor", ex);
         }
 
         sServerSocket = null;
@@ -514,7 +520,7 @@ public class ZygoteInit {
         String args[] = {
             "--setuid=1000",
             "--setgid=1000",
-            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007",
+            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007,3009",
             "--capabilities=" + capabilities + "," + capabilities,
             "--runtime-init",
             "--nice-name=system_server",

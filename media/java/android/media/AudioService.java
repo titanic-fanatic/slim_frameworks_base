@@ -49,6 +49,8 @@ import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
+import android.net.http.CertificateChainValidator;
+import android.net.http.SslError;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -81,10 +83,12 @@ import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
@@ -116,6 +120,8 @@ public class AudioService extends IAudioService.Stub {
     protected static final boolean DEBUG_RC = false;
     /** Debug volumes */
     protected static final boolean DEBUG_VOL = false;
+    /** Debug cert verification */
+    private static final boolean DEBUG_CERTS = false;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
@@ -412,6 +418,7 @@ public class AudioService extends IAudioService.Stub {
 
     private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
     private int mDeviceRotation = Surface.ROTATION_0;
+    private int mUiThemeMode = Configuration.UI_THEME_MODE_NORMAL;
 
     // Request to override default use of A2DP for media.
     private boolean mBluetoothA2dpEnabled;
@@ -4440,6 +4447,13 @@ public class AudioService extends IAudioService.Stub {
             // reading new orientation "safely" (i.e. under try catch) in case anything
             // goes wrong when obtaining resources and configuration
             Configuration config = context.getResources().getConfiguration();
+
+            // UI theme mode has changed....set the theme of the volume panel
+            if (mUiThemeMode != config.uiThemeMode) {
+                mUiThemeMode = config.uiThemeMode;
+                mVolumePanel.setTheme();
+            }
+
             // TODO merge rotation and orientation
             if (mMonitorOrientation) {
                 int newOrientation = config.orientation;
@@ -4692,6 +4706,43 @@ public class AudioService extends IAudioService.Stub {
                 mPendingVolumeCommand = null;
             }
         }
+    }
+
+    public int verifyX509CertChain(int numcerts, byte [] chain, String domain, String authType) {
+
+        if (DEBUG_CERTS) {
+            Log.v(TAG, "java side verify for "
+                    + numcerts + " certificates (" + chain.length + " bytes"
+                            + ")for "+ domain + "/" + authType);
+        }
+
+        byte[][] certChain = new byte[numcerts][];
+
+        ByteBuffer buf = ByteBuffer.wrap(chain);
+        for (int i = 0; i < numcerts; i++) {
+            int certlen = buf.getInt();
+            if (DEBUG_CERTS) {
+                Log.i(TAG, "cert " + i +": " + certlen);
+            }
+            certChain[i] = new byte[certlen];
+            buf.get(certChain[i]);
+        }
+
+        try {
+            SslError err = CertificateChainValidator.verifyServerCertificates(certChain,
+                    domain, authType);
+            if (DEBUG_CERTS) {
+                Log.i(TAG, "verified: " + err);
+            }
+            if (err == null) {
+                return -1;
+            } else {
+                return err.getPrimaryError();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "failed to verify chain: " + e);
+        }
+        return SslError.SSL_INVALID;
     }
 
 
