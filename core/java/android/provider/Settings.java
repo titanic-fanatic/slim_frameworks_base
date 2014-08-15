@@ -3507,6 +3507,13 @@ public final class Settings {
                 "notification_shortcuts_color_mode";
 
         /**
+         * Whether heads up notification is shown on the bottom of the screen (default = disabled)
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_GRAVITY_BOTTOM = "heads_up_gravity_bottom";
+
+        /**
          * Whether heads up notification is expanded by default (default = disabled)
          *
          * @hide
@@ -3624,6 +3631,8 @@ public final class Settings {
          * by a single controller to update all settings values simultaneiously.
          * This is stored in minutes from the start of the day.
          * 0 - 6 are parsed and compared to Sunday (1) through Saturday (7)
+         * 7 - 13 are parsed and compared to Sunday through Saturday
+         * for additional day times (work/weekend-scheduling/etc).
          * @hide
          */
         public static final String[] QUIET_HOURS_START_TIMES = new String[] {
@@ -3633,7 +3642,14 @@ public final class Settings {
             "quiet_hours_start_times_wed",
             "quiet_hours_start_times_thurs",
             "quiet_hours_start_times_fri",
-            "quiet_hours_start_times_sat"
+            "quiet_hours_start_times_sat",
+            "quiet_hours_start_times_sun_extra",
+            "quiet_hours_start_times_mon_extra",
+            "quiet_hours_start_times_tues_extra",
+            "quiet_hours_start_times_wed_extra",
+            "quiet_hours_start_times_thurs_extra",
+            "quiet_hours_start_times_fri_extra",
+            "quiet_hours_start_times_sat_extra"
         };
 
         /**
@@ -3641,6 +3657,8 @@ public final class Settings {
          * by a single controller to update all settings values simultaneiously.
          * This is stored in minutes from the start of the day.
          * 0 - 6 are parsed and compared to Sunday (1) through Saturday (7)
+         * 7 - 13 are parsed and compared to Sunday through Saturday
+         * for additional day times (work/weekend-scheduling/etc).
          * @hide
          */
         public static final String[] QUIET_HOURS_END_TIMES = new String[] {
@@ -3650,7 +3668,14 @@ public final class Settings {
             "quiet_hours_end_times_wed",
             "quiet_hours_end_times_thurs",
             "quiet_hours_end_times_fri",
-            "quiet_hours_end_times_sat"
+            "quiet_hours_end_times_sat",
+            "quiet_hours_end_times_sun_extra",
+            "quiet_hours_end_times_mon_extra",
+            "quiet_hours_end_times_tues_extra",
+            "quiet_hours_end_times_wed_extra",
+            "quiet_hours_end_times_thurs_extra",
+            "quiet_hours_end_times_fri_extra",
+            "quiet_hours_end_times_sat_extra"
         };
 
         /**
@@ -3679,6 +3704,15 @@ public final class Settings {
          * @hide
          */
         public static final String QUIET_HOURS_HAPTIC = "quiet_hours_haptic";
+
+        /**
+         * Whether to disable system sounds during quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and active
+         * @hide
+         */
+        public static final String QUIET_HOURS_SYSTEM = "quiet_hours_system";
 
         /**
          * Whether to remove the vibration from outgoing notifications during quiet hours.
@@ -3985,6 +4019,13 @@ public final class Settings {
          * @hide
          */
         public static final String RECENT_PANEL_SHOW_TOPMOST = "recent_panel_show_topmost";
+
+        /**
+         * Recent panel background color
+         *
+         * @hide
+         */
+        public static final String RECENT_PANEL_BG_COLOR = "recent_panel_bg_color";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
