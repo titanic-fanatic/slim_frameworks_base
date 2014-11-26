@@ -2062,6 +2062,19 @@ public final class Settings {
         public static final String VOLUME_PANEL_BG_COLOR = "volume_panel_bg_color";
 
         /**
+         * Whether the proximity sensor will adjust call to speaker
+         * @hide
+         */
+        public static final String PROXIMITY_AUTO_SPEAKER = "proximity_auto_speaker";
+
+        /**
+         * Whether the proximity sensor will adjust call to speaker,
+         * only while in call (not while ringing on outgoing call)
+         * @hide
+         */
+        public static final String PROXIMITY_AUTO_SPEAKER_INCALL_ONLY = "proximity_auto_speaker_incall_only";
+
+        /**
          * Whether the torch will pulse on incoming call
          * @hide
          */
@@ -2139,6 +2152,12 @@ public final class Settings {
          * @hide
          */
         public static final String INCREASING_RING_INTERVAL = "increasing_ring_interval";
+
+        /**
+         * Timeout for volume panel
+         * @hide
+         */
+        public static final String VOLUME_PANEL_TIMEOUT = "volume_panel_timeout";
 
         /**
          * Volume Adjust Sounds Enable, This is the noise made when using volume hard buttons
@@ -3298,6 +3317,14 @@ public final class Settings {
         public static final String EXPANDED_RING_MODE = "expanded_ring_mode";
 
         /**
+          * Disable smart cover window
+          * 0 = no
+          * 1 = yes
+          * @hide
+          */
+         public static final String DISABLE_SMART_COVER = "disable_smart_cover";
+
+        /**
          * Quick Settings Quick Pulldown
          *
          * @hide
@@ -3354,6 +3381,13 @@ public final class Settings {
          */
         public static final String STATUS_BAR_CIRCLE_BATTERY_ANIMATIONSPEED =
                 "status_bar_circle_battery_animationspeed";
+
+        /**
+        * Whether to enable ticker animation
+        *
+        * @hide
+        */
+       public static final String TICKER_ENABLED = "ticker_enabled";
 
         /**
         * Whether to control brightness from status bar
@@ -3730,6 +3764,12 @@ public final class Settings {
          * @hide
          */
         public static final String QUIET_HOURS_HAPTIC = "quiet_hours_haptic";
+
+        /**
+         * @hide
+         */
+        public static final String PROXIMITY_ON_WAKE = "proximity_on_wake";
+
 
         /**
          * Whether to disable system sounds during quiet hours.
